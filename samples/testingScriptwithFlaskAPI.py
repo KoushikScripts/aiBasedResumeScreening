@@ -1,12 +1,13 @@
-from flask import Flask, request, send_file
-import fitz  # PyMuPDF
-import tempfile
-import os
-
-# --- your function copy paste ---
+# bro some imports
+from flask import Flask, send_file
+import fitz  # pymupdf
 import re
 from pathlib import Path
 
+# bro setup server
+app = Flask(__name__)
+
+# bro the function to process pdfs
 def process_and_highlight_pdf(input_pdf_path, output_pdf_path):
     doc = fitz.open(input_pdf_path)
 
@@ -35,34 +36,24 @@ def process_and_highlight_pdf(input_pdf_path, output_pdf_path):
             )
 
     doc.save(output_pdf_path)
-    print(f"✅ Done! Highlighted PDF saved as: {output_pdf_path}")
+    print(f"✅ Bro done! Highlighted PDF saved at: {output_pdf_path}")
 
-# --- Flask part starts here ---
+# bro the api route
+@app.route('/process-resume', methods=['GET'])
+def process_resume_api():
+    input_pdf_path = "/home/surya/Projects/aiResumeScreaning/data/sampleResume.pdf" # change this path to the actual path where you saved the sample resume file
+    output_pdf_path = "/home/surya/Projects/aiResumeScreaning/data/highlighted_sampleResume.pdf" #change this path to where you want to download
 
-app = Flask(__name__)
+    # bro check if file even exists lol
+    if not Path(input_pdf_path).exists():
+        return {"error": "Bruh! Input PDF not found 😭"}, 404
 
-@app.route('/process-resume', methods=['POST'])
-def process_resume():
-    if 'file' not in request.files:
-        return {"error": "No file uploaded"}, 400
+    process_and_highlight_pdf(input_pdf_path, output_pdf_path)
 
-    file = request.files['file']
+    return send_file(output_pdf_path, as_attachment=True)
 
-    if file.filename == '':
-        return {"error": "Empty filename"}, 400
-
-    # Save the uploaded file to a temporary location
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        input_path = os.path.join(tmpdirname, 'input_resume.pdf')
-        output_path = os.path.join(tmpdirname, 'highlighted_resume.pdf')
-
-        file.save(input_path)
-
-        # Process the uploaded PDF
-        process_and_highlight_pdf(input_path, output_path)
-
-        # Return the highlighted file
-        return send_file(output_path, as_attachment=True, download_name='highlighted_resume.pdf')
-
-if __name__ == '__main__':
+# bro start the server
+if __name__ == "__main__":
     app.run(debug=True)
+
+    # after changing that you can just visit "http://localhost:5000/process-resume" to run the api which will fetch the pdf and hilight it with the errors

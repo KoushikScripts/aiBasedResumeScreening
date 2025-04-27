@@ -25,7 +25,7 @@ def process_and_highlight_pdf(input_pdf_path, output_pdf_path):
 
         if len(re.findall(r"\bI\b", text)) > 15:
             page.insert_text(
-                (50, y_position + 30),
+                (50, y_position + 30),to
                 "⚠️ Too much 'I' usage",
                 fontsize=12,
                 color=(1, 0, 0)
