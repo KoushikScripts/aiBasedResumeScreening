@@ -1,26 +1,32 @@
 import fitz
 import joblib
 import pandas as pd
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 from utils.feature_extractor import extract_features
 
 app = Flask(__name__)
 model = joblib.load("model/resume_score_model.pkl")
 
-# 🔧 SET YOUR PDF PATH HERE
-PDF_PATH = "/home/surya/resumeScoring/uploads/suryaResume.pdf"
-
-def extract_text_from_pdf_file(file_path):
-    doc = fitz.open(file_path)
+def extract_text_from_pdf_bytes(file_bytes):
+    doc = fitz.open(stream=file_bytes, filetype="pdf")
     text = ""
     for page in doc:
         text += page.get_text()
     return text
 
 @app.route('/predict', methods=['POST'])
-def predict_from_path():
+def predict_from_uploaded_pdf():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "Empty filename"}), 400
+
     try:
-        raw_text = extract_text_from_pdf_file(PDF_PATH)
+        file_bytes = file.read()
+        raw_text = extract_text_from_pdf_bytes(file_bytes)
     except Exception as e:
         return jsonify({"error": f"Failed to read PDF: {e}"}), 400
 
@@ -51,7 +57,6 @@ def predict_from_path():
         feedback.append("Use more powerful action verbs")
 
     return jsonify({
-        "file": PDF_PATH,
         "score": round(score, 2),
         "suggestions": {
             "word_replacements": word_replacements,
@@ -62,4 +67,3 @@ def predict_from_path():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
