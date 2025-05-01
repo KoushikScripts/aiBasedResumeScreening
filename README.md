@@ -14,7 +14,7 @@ This project implements a machine learning model to score and suggest improvemen
    ```bash
    git clone https://github.com/yourusername/resume-scoring-suggestion-model.git
    cd resume-scoring-suggestion-model
-Install the required libraries:
+2. Install the required libraries:
 
    ```bash
    pip install -r requirements.txt
