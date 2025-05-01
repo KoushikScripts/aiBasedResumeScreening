@@ -18,7 +18,4 @@ Install the required libraries:
 
    ```bash
    pip install -r requirements.txt
-Install additional dependencies for PDF processing:
-
-```bash
-pip install PyPDF2
+   pip install PyPDF2
